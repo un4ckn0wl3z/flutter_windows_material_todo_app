@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_todo_app/helpers/objectbox_interface.dart';
 import 'package:flutter_material_todo_app/screens/home_screen.dart';
 
-void main() {
+late ObjectBox objectBox;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  objectBox = await ObjectBox.create();
   runApp(const MyApp());
 }
 
