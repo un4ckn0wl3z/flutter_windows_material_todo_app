@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_todo_app/screens/task_editor_screen.dart';
+import 'package:flutter_material_todo_app/widgets/task_widget.dart';
+
+import '../main.dart';
+import '../models/task_model.dart';
+import '../objectbox.g.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -9,6 +14,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Box<TodoEntity>? taskBox;
+  Stream<List<TodoEntity>>? fetchAllTasks;
+
+  @override
+  void initState() {
+    super.initState();
+    taskBox = objectBox.store.box<TodoEntity>();
+    setState(() {
+      fetchAllTasks =
+          taskBox!.query().watch(triggerImmediately: true).map((event) {
+        return event.find();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    objectBox.store.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +84,24 @@ class _HomeScreenState extends State<HomeScreen> {
               const Divider(
                 color: Colors.white,
               ),
+              StreamBuilder<List<TodoEntity>>(
+                  stream: fetchAllTasks,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else {
+                      if (snapshot.hasData) {
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: snapshot.data!
+                                .map((e) => TaskWidget(e))
+                                .toList(),
+                          ),
+                        );
+                      }
+                    }
+                    return const Center();
+                  }),
             ],
           ),
         ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_todo_app/main.dart';
+import 'package:flutter_material_todo_app/models/task_model.dart';
+import 'package:flutter_material_todo_app/objectbox.g.dart';
 
 class TaskEditorScreen extends StatefulWidget {
   const TaskEditorScreen({Key? key}) : super(key: key);
@@ -8,6 +11,10 @@ class TaskEditorScreen extends StatefulWidget {
 }
 
 class _TaskEditorScreenState extends State<TaskEditorScreen> {
+  Box<TodoEntity> taskBox = objectBox.store.box<TodoEntity>();
+  final TextEditingController _taskTitleController = TextEditingController();
+  final TextEditingController _taskDescController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,6 +44,7 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
                 height: 10,
               ),
               TextField(
+                controller: _taskTitleController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   fillColor: Colors.black12,
@@ -64,6 +72,7 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
                 height: 10,
               ),
               TextField(
+                controller: _taskDescController,
                 style: const TextStyle(color: Colors.white),
                 minLines: 5,
                 maxLines: 10,
@@ -71,7 +80,7 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
                   fillColor: Colors.black12,
                   filled: true,
                   hintStyle: const TextStyle(color: Colors.white12),
-                  hintText: "Type your Task Title eg: Buy some Milk",
+                  hintText: "Type you Task description",
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8.0),
@@ -86,7 +95,16 @@ class _TaskEditorScreenState extends State<TaskEditorScreen> {
                 children: [
                   MaterialButton(
                     elevation: 0.0,
-                    onPressed: () {},
+                    onPressed: () {
+                      String taskTitle = _taskTitleController.text;
+                      String taskDesc = _taskDescController.text;
+                      TodoEntity model = TodoEntity(
+                          taskTitle: taskTitle,
+                          taskDescription: taskDesc,
+                          creationDate: DateTime.now());
+                      taskBox.put(model);
+                      Navigator.pop(context);
+                    },
                     color: Colors.blueAccent,
                     child: const Text("Save Task"),
                   )
